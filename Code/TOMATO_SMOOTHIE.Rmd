@@ -1,1 +1,254 @@
+---
+title: "Understanding Employee Turnover: A Statistical and Predictive Analysis of HR Attrition Patterns"
+author: "Team 4"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: hide
+    theme: flatly
+    highlight: tango
+    fig_width: 10
+    fig_height: 6
+    df_print: paged
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+---
 
+```{r setup-css, include=FALSE}
+# Optional: Create a custom CSS (commented for simplicity)
+# cat('/* Custom CSS omitted for now for portability */', file = "custom.css")
+```
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(caret)
+library(ezids)
+library(summarytools)
+library(corrplot)
+library(cluster)
+library(knitr)
+library(randomForest)
+library(rpart)
+library(rpart.plot)
+library(pROC)
+library(ResourceSelection)
+library(factoextra)
+library(gridExtra)
+library(grid)
+library(scales)
+library(kableExtra)
+options(scipen = 999)
+set.seed(123)
+```
+
+## Executive Summary
+<div class="highlight-box highlight-blue">
+Employee turnover is a major challenge, not just for HR but for businesses at large. Costs range from 50%–200% of the employee's annual salary. Through data science, we can predict risk, understand drivers of attrition, and improve retention strategies.
+</div>
+
+## Project Goals
+1. Identify key drivers of attrition
+2. Build predictive models
+3. Segment employees by attrition risk
+4. Recommend HR interventions
+
+## Data Overview
+```{r import-data, echo=FALSE, message=FALSE}
+hr <- read_csv("Augmented_HR_Employee_Attrition_4000.csv")
+```
+```{r structure-summary, echo=FALSE}
+head(hr)
+```
+```{r summary-stats, echo=FALSE, results='asis'}
+print(dfSummary(hr), method = 'render')
+```
+
+## Exploratory Data Analysis
+```{r attrition-dist, echo=FALSE}
+hr %>% count(Attrition) %>% ggplot(aes(x = Attrition, y = n, fill = Attrition)) +
+  geom_col() + theme_minimal() + labs(title = "Attrition Distribution")
+```
+```{r monthly-income, echo=FALSE}
+ggplot(hr, aes(x = Attrition, y = MonthlyIncome, fill = Attrition)) +
+  geom_boxplot() + theme_minimal() + labs(title = "Monthly Income by Attrition")
+```
+```{r wlb-barplot, echo=FALSE}
+hr %>% count(WorkLifeBalance, Attrition) %>% ggplot(aes(x = factor(WorkLifeBalance), y = n, fill = Attrition)) +
+  geom_col(position = "dodge") + theme_minimal() +
+  labs(title = "WorkLifeBalance by Attrition", x = "WorkLifeBalance (1=Bad, 4=Best)")
+```
+```{r correlation-matrix, echo=FALSE}
+numeric_cols <- hr %>% select_if(is.numeric)
+corrplot(cor(numeric_cols, use = "complete.obs"), method = "color", tl.cex = 0.8)
+```
+
+## Hypothesis Testing
+
+### Years at Company vs Attrition
+```{r ttest-years, echo=FALSE}
+t.test(YearsAtCompany ~ Attrition, data = hr)
+```
+**Interpretation:** Employees who stayed longer at the company had a significantly lower chance of leaving. Mean difference is ~2.6 years (p < 0.001).
+
+### Job Satisfaction vs Attrition
+```{r ttest-jobsatisfaction, echo=FALSE}
+t.test(JobSatisfaction ~ Attrition, data = hr)
+```
+**Interpretation:** Employees who left had significantly lower job satisfaction scores on average (p < 0.001).
+
+### Environment Satisfaction vs Attrition
+```{r ttest-envsatisfaction, echo=FALSE}
+t.test(EnvironmentSatisfaction ~ Attrition, data = hr)
+```
+**Interpretation:** Those who stayed reported higher satisfaction with their work environment (p < 0.001).
+
+### Monthly Income vs Attrition
+```{r ttest-income, echo=FALSE}
+t.test(MonthlyIncome ~ Attrition, data = hr)
+```
+**Interpretation:** Monthly income was significantly lower for employees who left (p < 0.001).
+
+### Business Travel and Attrition
+```{r chisq-travel, echo=FALSE}
+table_travel <- table(hr$BusinessTravel, hr$Attrition)
+chisq.test(table_travel)
+```
+**Interpretation:** There is a strong association between frequency of business travel and employee attrition (p < 0.001).
+
+### Job Role and Attrition
+```{r chisq-role, echo=FALSE}
+table_role <- table(hr$JobRole, hr$Attrition)
+chisq.test(table_role)
+```
+**Interpretation:** Certain job roles show significantly higher or lower attrition rates (p < 0.001).
+
+### OverTime and Attrition
+```{r chisq-overtime, echo=FALSE}
+table_overtime <- table(hr$OverTime, hr$Attrition)
+chisq.test(table_overtime)
+```
+**Interpretation:** Employees working overtime had a much higher likelihood of leaving (p < 0.001).
+```{r hypo-tests, echo=FALSE}
+t.test(YearsAtCompany ~ Attrition, data = hr)
+t.test(JobSatisfaction ~ Attrition, data = hr)
+t.test(EnvironmentSatisfaction ~ Attrition, data = hr)
+t.test(MonthlyIncome ~ Attrition, data = hr)
+table_travel <- table(hr$BusinessTravel, hr$Attrition)
+chisq.test(table_travel)
+table_role <- table(hr$JobRole, hr$Attrition)
+chisq.test(table_role)
+table_overtime <- table(hr$OverTime, hr$Attrition)
+chisq.test(table_overtime)
+```
+
+## Logistic Regression Modeling
+
+### Logistic Regression Data Preparation
+```{r model-data-prep, echo=FALSE}
+hr$AttritionBinary <- ifelse(hr$Attrition == "Yes", 1, 0)
+logit_data <- hr %>% select(AttritionBinary, MonthlyIncome, JobSatisfaction,
+                            EnvironmentSatisfaction, OverTime, BusinessTravel,
+                            YearsAtCompany, WorkLifeBalance)
+logit_data$OverTime <- as.factor(logit_data$OverTime)
+logit_data$BusinessTravel <- as.factor(logit_data$BusinessTravel)
+```
+
+
+### Logistic Regression
+```{r logit-model, echo=FALSE}
+logit_model <- glm(AttritionBinary ~ ., data = logit_data, family = binomial)
+summary(logit_model)
+```
+
+
+
+
+
+### Random Forest Classification
+```{r rf-modeling, echo=FALSE}
+logit_data$AttritionBinary <- as.factor(logit_data$AttritionBinary)
+rf_model <- randomForest(AttritionBinary ~ ., data = logit_data, ntree = 500, mtry = 3, importance = TRUE)
+print(rf_model)
+```
+
+### Random Forest Variable Importance
+```{r rf-importance, echo=FALSE}
+varImpPlot(rf_model, main = "Random Forest - Variable Importance")
+```
+
+### ROC Curve - Logistic Regression vs Random Forest
+```{r roc-curve, echo=FALSE}
+logit_probs <- predict(logit_model, type = "response")
+logit_roc <- roc(logit_data$AttritionBinary, logit_probs)
+
+rf_probs <- predict(rf_model, type = "prob")[,2]
+rf_roc <- roc(logit_data$AttritionBinary, rf_probs)
+
+plot(logit_roc, col = "blue", print.auc = TRUE, main = "ROC Curve - Logistic vs Random Forest")
+lines(rf_roc, col = "darkgreen")
+legend("bottomright", legend = c("Logistic", "Random Forest"), col = c("blue", "darkgreen"), lwd = 2)
+```
+
+
+
+
+
+## Clustering Analysis
+```{r kmeans-setup, echo=FALSE}
+cluster_data <- hr %>% select(MonthlyIncome, JobSatisfaction, EnvironmentSatisfaction,
+                              YearsAtCompany, WorkLifeBalance) %>% scale()
+```
+```{r elbow-method, echo=FALSE}
+wss <- map_dbl(1:10, function(k) {
+  kmeans(cluster_data, centers = k, nstart = 10)$tot.withinss
+})
+plot(1:10, wss, type = "b", pch = 19, xlab = "Number of Clusters",
+     ylab = "Within-cluster Sum of Squares", main = "Elbow Method")
+```
+```{r kmeans-final, echo=FALSE}
+kmeans_model <- kmeans(cluster_data, centers = 3, nstart = 25)
+hr$Cluster <- as.factor(kmeans_model$cluster)
+fviz_cluster(kmeans_model, data = cluster_data, geom = "point",
+             main = "Employee Clusters", ellipse.type = "convex")
+```
+
+## Conclusion & Recommendations
+
+### Interpretation of Statistical Results
+- **Tenure:** t-tests confirm employees who left had significantly fewer years at the company (mean ~4.7 vs 7.3, p < 0.001).
+- **Satisfaction:** Both job and environment satisfaction scores were lower for those who left (p < 0.001).
+- **Income:** Monthly income was significantly lower for the attrition group (mean ~4600 vs 6800, p < 0.001).
+- **OverTime:** Chi-square test shows a strong association between overtime and attrition (p < 0.001).
+- **Job Role & Business Travel:** Chi-square tests show some roles and travel patterns are linked to higher attrition.
+
+### Model Takeaways
+- **Logistic Regression**: Predictors like OverTime and YearsAtCompany had strong influence on attrition odds. For instance, employees with OverTime were ~4.5x more likely to leave.
+- **KMeans Clustering**: Employees were grouped into 3 segments—one with low satisfaction and high risk, one stable group, and one mixed.
+
+### Final Summary
+This project utilized EDA, hypothesis testing, and machine learning to understand employee turnover. Key drivers such as OverTime, job satisfaction, and tenure were found to be consistently significant.
+
+Logistic regression helped quantify the effect of these features, while KMeans clustering provided segmentation insight useful for HR planning. These findings are directly tied to the SMART objectives defined at the outset.
+
+### SMART Recap Table
+| SMART Element | Summary Answer |
+|---------------|----------------|
+| **Specific** | OverTime, satisfaction, and job role significantly influence attrition. |
+| **Measurable** | Statistically significant differences were confirmed through t-tests and chi-square tests. |
+| **Achievable** | Logistic regression and clustering worked effectively on our dataset. |
+| **Relevant** | Attrition patterns differ by business role and travel status. |
+| **Time-bound** | Tenure less than 3 years correlated with higher attrition risk. |
+
+### Recommendations
+- **Reduce OverTime** to retain employees
+- **Monitor low satisfaction clusters** for risk
+- **Build dashboards** for real-time attrition monitoring
+- **Prioritize new hires (YearsAtCompany < 3)** for early engagement strategies
+- Short tenure, overtime, and low satisfaction are attrition drivers
+- Use clusters for early intervention
+- Build dashboards or apply advanced models (e.g., random forest)
+- Prioritize support for Cluster 1 employees and high-risk job roles
