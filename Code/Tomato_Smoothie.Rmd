@@ -258,6 +258,7 @@ library(ResourceSelection) # For Hosmer-Lemeshow test
 library(pROC)          # For ROC curves
 library(knitr)         # For tables
 library(kableExtra)    # For enhanced tables
+library(summarytools)
 
 # Set seed for reproducibility
 set.seed(123)
@@ -302,6 +303,9 @@ attrition_data$TenureGroup <- factor(ifelse(attrition_data$YearsAtCompany < 3,
 
 # Show the structure of modified data
 glimpse(attrition_data)
+```
+```{r }
+print(dfSummary(attrition_data),method='render')
 ```
 
 ## 3. Exploratory Data Analysis (EDA)
@@ -1314,19 +1318,9 @@ The Random Forest model developed in this project can be deployed by HR teams to
 - **Cross-Industry Validation**: Test models across different industries and company sizes
 </div>
 
-```{r setup-libs, include=FALSE}
-# Auto‐install and load required packages
-pkgs <- c("tidyverse", "ggthemes", "viridis", "hrbrthemes",
-          "patchwork", "scales", "gghighlight", "RColorBrewer")
-for (pkg in pkgs) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg)
-  }
-  library(pkg, character.only = TRUE)
-}
+## 10. References
 
-# Define your custom theme and palettes below...
-theme_hr <- function() { ... }
-
-attrition_colors <- c("No" = "#1F77B4", "Yes" = "#FF7F0E")
-```
+- Caret package: Kuhn, M. (2008). Building Predictive Models in R Using the caret Package. Journal of Statistical Software, 28(5), 1-26.
+- Random Forest: Breiman, L. (2001). Random Forests. Machine Learning, 45(1), 5-32.
+- K-means Clustering: Hartigan, J. A., & Wong, M. A. (1979). Algorithm AS 136: A K-means clustering algorithm. Journal of the Royal Statistical Society. Series C (Applied Statistics), 28(1), 100-108.
+- Employee Attrition: Allen, D. G., Bryant, P. C., & Vardaman, J. M. (2010). Retaining talent: Replacing misconceptions with evidence-based strategies. Academy of Management Perspectives, 24(2), 48-64.
