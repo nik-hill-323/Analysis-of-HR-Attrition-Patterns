@@ -1,115 +1,116 @@
-# Analysis-of-HR-Attrition-Patterns
-Understanding-Employee-Turnover
-Tomato Smoothie🍅
+# 🍅 Analysis of HR Attrition Patterns  
+**Understanding Employee Turnover**  
+*by Tomato Smoothie*
 
-A Statistical and Predictive Analysis of HR Attrition Patterns
-HR Insight Logo
+---
 
-📊 Overview
-This repository presents a detailed statistical and machine learning-driven analysis of employee turnover. The goal is to understand the key drivers behind HR attrition and build predictive models to identify at-risk employees before they leave the organization.
+## 📊 Overview
+This repository presents a comprehensive **statistical and machine learning-based analysis** of employee attrition. The goal is to uncover the key drivers behind workforce turnover and build predictive models to identify employees at risk of leaving.
 
-👥 Dataset Description
-The analysis utilizes a cleaned HR dataset containing demographic and organizational attributes of employees. Key data fileinclude:
+---
 
-Augmented_HR_Employee_Attrition_4000.csv
+## 👥 Dataset Description
+We use a curated and cleaned HR dataset that includes both **demographic and organizational attributes** of employees.
 
-🔧 Dependencies
-This project is implemented in R and requires the following packages:
+**Key file:**
+- `Augmented_HR_Employee_Attrition_4000.csv`
 
+---
 
-library(ggplot2)      # Visualization  
-library(dplyr)        # Data manipulation  
-library(readr)        # Reading datasets  
-library(tidyr)        # Reshaping data  
-library(lubridate)    # Handling dates  
-library(caret)        # ML models  
-library(forcats)      # Factor level management  
-library(e1071)        # SVMs and additional ML tools 
-library(tidyverse)     # For data manipulation and visualization
-library(corrplot)      # For correlation plots
-library(caret)         # For machine learning workflows
-library(randomForest)  # For random forest model
-  library(rpart)         # For decision tree model
-  library(rpart.plot)    # For plotting decision trees
-  library(cluster)       # For K-means clustering
-  library(factoextra)    # For cluster visualization
-  library(gridExtra)     # For arranging multiple plots
-  library(grid)          # For grid graphics (needed for textGrob)
-  library(scales)        # For scale formatting
-  library(ResourceSelection) # For Hosmer-Lemeshow test
-  library(pROC)          # For ROC curves
-  library(knitr)         # For tables
-  library(kableExtra)    # For enhanced tables
-  library(viridis)
+## 🔧 Dependencies
+This project is built using **R**. Make sure the following packages are installed:
 
-📋 Features
-Descriptive Statistics: Summary metrics and visual breakdown of attrition
+```r
+library(ggplot2)         # Visualization  
+library(dplyr)           # Data manipulation  
+library(readr)           # Reading datasets  
+library(tidyr)           # Data reshaping  
+library(lubridate)       # Date handling  
+library(caret)           # ML workflows  
+library(forcats)         # Factor management  
+library(e1071)           # SVMs and ML tools  
+library(tidyverse)       # Unified data manipulation and visualization  
+library(corrplot)        # Correlation heatmaps  
+library(randomForest)    # Random Forests  
+library(rpart)           # Decision trees  
+library(rpart.plot)      # Decision tree plots  
+library(cluster)         # K-means clustering  
+library(factoextra)      # Cluster visualizations  
+library(gridExtra)       # Plot layout  
+library(grid)            # Grid graphics  
+library(scales)          # Scale formatting  
+library(ResourceSelection) # Hosmer-Lemeshow test  
+library(pROC)            # ROC curves  
+library(knitr)           # Report tables  
+library(kableExtra)      # Enhanced table output  
+library(viridis)         # Color palettes
+```
 
-Correlation Heatmaps: Identification of strongly linked attrition factors
+---
 
-Predictive Modeling: Logistic Regression, Decision Trees, and SVMs for attrition prediction
+## 📋 Features
+- **📊 Descriptive Statistics**: Summary metrics and visual breakdown of attrition.
+- **🧬 Correlation Analysis**: Identify variables most strongly associated with turnover.
+- **🔍 Predictive Modeling**: Logistic Regression, Decision Trees, and SVMs.
+- **👥 Clustering**: Unsupervised grouping of high-risk employee profiles.
+- **🗕️ Temporal Trends**: Monthly, quarterly, and yearly turnover patterns.
+- **🏢 Workforce Insights**: Risk segmented by department and role.
+- **📈 Data-Driven Recommendations**: Practical suggestions to reduce attrition.
 
-Cluster Analysis: Grouping high-risk employee profiles using unsupervised learning
+---
 
-Temporal Trends: Analysis of monthly, quarterly, and yearly attrition patterns
+## 🚀 Key Findings
+- Attrition is highest among **mid-level employees** (2–5 years tenure).
+- **Lack of promotion** and **low job satisfaction** are key churn indicators.
+- Turnover spikes in **Q1 and Q3**, likely due to performance cycles.
+- Models achieved up to **84.7% prediction accuracy**.
+- **R&D and Sales** departments consistently show elevated attrition.
 
-Workforce Insights: Role-based and department-wise risk evaluation
+---
 
-Recommendations: Data-driven suggestions for improving retention
+## 💡 Research Questions
+This project is guided by SMART research questions:
 
-🚀 Key Findings
-Attrition is highest among mid-level employees with 2–5 years of experience
+- **Specific**: What are the key drivers of employee turnover?
+- **Measurable**: How do satisfaction and promotions correlate with attrition?
+- **Achievable**: Can we accurately predict employee exits?
+- **Relevant**: Which departments are most vulnerable?
+- **Time-bound**: What are the seasonal attrition patterns over 3 years?
 
-Lack of promotion and low satisfaction are key churn indicators
+---
 
-Attrition peaks during Q1 and Q3, hinting at post-review and pre-fiscal year exits
+## 🛠️ Usage
 
-Machine learning models achieved up to 84.7% accuracy in predicting attrition
+1. Clone this repository  
+2. Install all required R packages  
+3. Place all CSV files in the `/data` directory  
+4. Open and run `employee_turnover_analysis.Rmd`  
+5. View the generated HTML report
 
-R&D and Sales departments consistently show above-average turnover rates
+---
 
-💡 Research Questions
-This project answers the following SMART questions:
+## 📈 Sample Visualizations
 
-Specific: What are the main causes of employee turnover?
+### Attrition by Department
+Bar chart highlighting turnover rates across departments.
 
-Measurable: How do satisfaction levels and promotions correlate with attrition?
+### Model Accuracy Comparison
+Plot showing accuracy of different ML models used.
 
-Achievable: Can a model accurately predict employee exits in advance?
+---
 
-Relevant: Which departments are most vulnerable to losing talent?
+## 🔗 References
+- IBM HR Analytics Attrition Dataset  
+- *Harvard Business Review*: Predicting Employee Turnover  
+- *SHRM*: Workforce Retention Reports
 
-Time-bound: What are the seasonal trends in attrition over the last 3 years?
+---
 
-📊 Usage
-To run the analysis:
+## 📄 License
+This project is licensed under the **MIT License**. See the `LICENSE` file for more information.
 
-Clone this repository
+---
 
-Install the necessary R packages
-
-Place all CSV files inside the /data directory
-
-Open and run employee_turnover_analysis.Rmd
-
-View the resulting HTML output for the full report
-
-📈 Sample Visualizations
-Attrition by Department
-Bar plot showing turnover rates across departments
-
-Predictive Accuracy of Models
-Chart comparing accuracy of different models used in the analysis
-
-🔗 References
-IBM HR Analytics Attrition Dataset
-
-Harvard Business Review: Predicting Employee Turnover
-
-SHRM Workforce Retention Reports
-
-📄 License
-This project is licensed under the MIT License. See the LICENSE file for full details.
-
-👤 Author
-Tomato Smoothie🍅
+## 👤 Author
+**Tomato Smoothie** 🍅  
+_Data Enthusiast & Human Behavior Explorer_
