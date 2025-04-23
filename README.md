@@ -9,7 +9,7 @@ HR Insight Logo
 This repository presents a detailed statistical and machine learning-driven analysis of employee turnover. The goal is to understand the key drivers behind HR attrition and build predictive models to identify at-risk employees before they leave the organization.
 
 👥 Dataset Description
-The analysis utilizes a cleaned HR dataset containing demographic and organizational attributes of employees. Key data files include:
+The analysis utilizes a cleaned HR dataset containing demographic and organizational attributes of employees. Key data fileinclude:
 
 Augmented_HR_Employee_Attrition_4000.csv
 
@@ -24,7 +24,23 @@ library(tidyr)        # Reshaping data
 library(lubridate)    # Handling dates  
 library(caret)        # ML models  
 library(forcats)      # Factor level management  
-library(e1071)        # SVMs and additional ML tools  
+library(e1071)        # SVMs and additional ML tools 
+library(tidyverse)     # For data manipulation and visualization
+library(corrplot)      # For correlation plots
+library(caret)         # For machine learning workflows
+library(randomForest)  # For random forest model
+  library(rpart)         # For decision tree model
+  library(rpart.plot)    # For plotting decision trees
+  library(cluster)       # For K-means clustering
+  library(factoextra)    # For cluster visualization
+  library(gridExtra)     # For arranging multiple plots
+  library(grid)          # For grid graphics (needed for textGrob)
+  library(scales)        # For scale formatting
+  library(ResourceSelection) # For Hosmer-Lemeshow test
+  library(pROC)          # For ROC curves
+  library(knitr)         # For tables
+  library(kableExtra)    # For enhanced tables
+  library(viridis)
 
 📋 Features
 Descriptive Statistics: Summary metrics and visual breakdown of attrition
