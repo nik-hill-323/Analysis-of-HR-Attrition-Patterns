@@ -11,17 +11,7 @@ This repository presents a detailed statistical and machine learning-driven anal
 👥 Dataset Description
 The analysis utilizes a cleaned HR dataset containing demographic and organizational attributes of employees. Key data files include:
 
-employee_attrition.csv: Main dataset with employee-level information
-
-turnover_trends.csv: Historical monthly turnover data
-
-satisfaction_scores.csv: Employee satisfaction across various parameters
-
-promotion_salary.csv: Records of promotions and compensation changes
-
-job_roles_breakdown.csv: Attrition trends across different job roles and departments
-
-exit_reason_tags.csv: Annotated reasons for employee exits
+Augmented_HR_Employee_Attrition_4000.csv
 
 🔧 Dependencies
 This project is implemented in R and requires the following packages:
