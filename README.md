@@ -84,7 +84,7 @@ This project is guided by SMART research questions:
 1. Clone this repository  
 2. Install all required R packages  
 3. Place all CSV files in the `/data` directory  
-4. Open and run `employee_turnover_analysis.Rmd`  
+4. Open and run `Tomato_Smoothie.Rmd`  
 5. View the generated HTML report
 
 ---
@@ -113,4 +113,3 @@ This project is licensed under the **MIT License**. See the `LICENSE` file for m
 
 ## 👤 Author
 **Tomato Smoothie** 🍅  
-_Data Enthusiast & Human Behavior Explorer_
