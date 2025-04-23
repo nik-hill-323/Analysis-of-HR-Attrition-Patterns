@@ -5,7 +5,7 @@
 ---
 
 ## 📊 Overview
-This repository presents a comprehensive **statistical and machine learning-based analysis** of employee attrition. The goal is to uncover the key drivers behind workforce turnover and build predictive models to identify employees at risk of leaving.
+This repository presents a comprehensive **statistical and machine learning-based analysis** of IBM employee attrition. The goal is to uncover the key drivers behind workforce turnover and build predictive models to identify employees at risk of leaving.
 
 ---
 
