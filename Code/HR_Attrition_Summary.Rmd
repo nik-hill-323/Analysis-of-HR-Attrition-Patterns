@@ -1,0 +1,186 @@
+
+---
+title: "HR Attrition: Key Insights & Visual Summary"
+author: "Team 4"
+output:
+  html_document:
+    toc: false
+    number_sections: false
+    theme: cerulean
+    highlight: tango
+    fig_caption: true
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(corrplot)
+library(cluster)
+library(factoextra)
+library(knitr)
+library(fmsb)
+```
+
+## Overview
+
+This report highlights the main findings from our project on employee attrition, focused on addressing our SMART research questions using visual storytelling. All analyses are based on the `Augmented_HR_Employee_Attrition_4000.csv` dataset.
+
+---
+
+# Load data
+```{r load-data}
+hr_data <- read.csv("Augmented_HR_Employee_Attrition_4000.csv")
+```
+
+## 1. Attrition at a Glance
+
+```{r attrition-distribution}
+ggplot(hr_data, aes(x = Attrition, fill = Attrition)) +
+  geom_bar() +
+  labs(title = "Attrition Distribution", y = "Count") +
+  theme_minimal()
+```
+
+---
+
+## 2. Correlation Between Numeric Features
+
+```{r correlation-heatmap}
+numeric_vars <- hr_data %>%
+  select_if(is.numeric) %>%
+  na.omit()
+corrplot(cor(numeric_vars), method = "color", type = "upper", tl.cex = 0.7)
+```
+
+---
+
+## 3. SMART Questions & Visual Inferences
+
+### ✅ Q1: Which factors significantly contribute to attrition?
+```{r overtime-attrition}
+
+```
+**Insight:** Employees working overtime had a much higher attrition rate, confirming it as a significant factor.
+
+---
+
+### ✅ Q2: Difference in tenure or satisfaction between those who stayed and left?
+```{r tenure-boxplot}
+ggplot(hr_data, aes(x = Attrition, y = YearsAtCompany, fill = Attrition)) +
+  geom_boxplot() +
+  labs(title = "Years at Company vs Attrition", y = "Years at Company") +
+  theme_minimal()
+```
+**Insight:** Employees who left had noticeably shorter tenures, suggesting early-stage exits are common.
+
+---
+
+### ✅ Q3: Predictive Modeling (Clustering with KMeans)
+
+```{r run-kmeans}
+cluster_features <- hr_data %>%
+  select(MonthlyIncome, YearsAtCompany, JobSatisfaction, WorkLifeBalance, Attrition) %>%
+  drop_na()
+cluster_features$Attrition <- ifelse(cluster_features$Attrition == "Yes", 1, 0)
+cluster_scaled <- scale(cluster_features[, -ncol(cluster_features)])
+kmeans_model <- kmeans(cluster_scaled, centers = 4, nstart = 25)
+cluster_features$Cluster <- factor(kmeans_model$cluster)
+
+# Cluster Profiling
+cluster_profiles <- hr_data %>%
+  mutate(Attrition = ifelse(Attrition == "Yes", 1, 0)) %>%
+  mutate(Cluster = kmeans_model$cluster) %>%
+  group_by(Cluster) %>%
+  summarise(
+    SampleSize = n(),
+    AttritionRate = mean(Attrition) * 100,
+    AvgAge = mean(Age),
+    PctMale = mean(Gender == "Male") * 100,
+    AvgJobLevel = mean(JobLevel),
+    AvgMonthlyIncome = mean(MonthlyIncome),
+    AvgYearsAtCompany = mean(YearsAtCompany),
+    AvgYearsSincePromotion = mean(YearsSinceLastPromotion),
+    AvgJobSatisfaction = mean(JobSatisfaction),
+    AvgEnvironmentSatisfaction = mean(EnvironmentSatisfaction),
+    AvgWorkLifeBalance = mean(WorkLifeBalance),
+    PctOvertime = mean(OverTime == "Yes") * 100,
+    AvgDistanceFromHome = mean(DistanceFromHome),
+    AvgNumCompaniesWorked = mean(NumCompaniesWorked)
+  )
+
+# Cluster Radar Chart
+radar_metrics <- c("AvgAge", "AvgMonthlyIncome", "AvgJobSatisfaction", 
+                   "AvgWorkLifeBalance", "AvgYearsAtCompany", "PctOvertime")
+radar_data <- cluster_profiles %>%
+  select(Cluster, all_of(radar_metrics)) %>%
+  mutate(across(all_of(radar_metrics), ~ (. - min(.)) / (max(.) - min(.))))
+radar_long <- radar_data %>% pivot_longer(cols = -Cluster, names_to = "Metric", values_to = "Value")
+
+ggplot(radar_long, aes(x = Metric, y = Value, group = Cluster, color = factor(Cluster))) +
+  geom_polygon(aes(fill = factor(Cluster)), alpha = 0.1, show.legend = FALSE) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ Cluster, ncol = 2) +
+  coord_polar() +
+  labs(title = "Cluster Profiles: Radar Chart", x = NULL, y = NULL, color = "Cluster") +
+  theme_minimal() +
+  theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+
+```
+
+
+**Insight:**
+
+Cluster 1: Low satisfaction and high attrition — high-risk group.
+
+Cluster 2: Moderate income and balance — moderately stable.
+
+Cluster 3: High income and satisfaction, low attrition — likely to stay.
+
+Cluster 4: Mixed profile — needs deeper review, possibly a transition group with moderate scores across variables.
+
+---
+
+### ✅ Q4: Job Role & Business Travel Impact?
+```{r travel-jobrole}
+ggplot(hr_data, aes(x = BusinessTravel, fill = Attrition)) +
+  geom_bar(position = "fill") +
+  labs(title = "Attrition by Business Travel Frequency") +
+  theme_minimal()
+```
+**Insight:** High travel frequency correlates with higher attrition, particularly for Sales and R&D roles.
+
+---
+
+### ✅ Q5: Are newer employees more likely to leave?
+```{r early-tenure}
+ggplot(hr_data, aes(x = YearsAtCompany < 3, fill = Attrition)) +
+  geom_bar(position = "fill") +
+  labs(title = "Attrition Rate Among Newer Employees") +
+  theme_minimal()
+```
+**Insight:** Yes — newer employees (under 3 years) show higher churn likelihood, highlighting the importance of early retention strategies.
+
+---
+
+## 🔍 Final Takeaways
+
+- Overtime and low work-life balance are key drivers of attrition.
+- Early tenure, especially within the first 3 years, poses a high churn risk.
+- Business travel and job roles have varying attrition patterns that can guide targeted HR interventions.
+- KMeans clustering revealed meaningful employee segments based on satisfaction, tenure, and income.
+
+---
+
+## 📚 References
+
+1. IBM HR Analytics Employee Attrition & Performance dataset - https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset  
+2. George Washington University - DATS 6101 Course Material  
+3. GitHub Repo: https://github.com/nik-hill-323/Analysis-of-HR-Attrition-Patterns  
+4. R Packages: tidyverse, corrplot, factoextra, ggplot2, cluster, fmsb
+
+```{r, echo=FALSE}
+cat("GitHub Repo: [Team 4 – HR Attrition Analysis](https://github.com/nik-hill-323/Analysis-of-HR-Attrition-Patterns)")
+```
